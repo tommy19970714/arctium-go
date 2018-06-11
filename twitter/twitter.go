@@ -9,8 +9,8 @@ import (
 )
 
 type TwitterToken struct {
-	accessToken       string
-	accessTokenSecret string
+	AccessToken       string
+	AccessTokenSecret string
 }
 
 func SetupTwitter() {
@@ -24,7 +24,7 @@ func SetupTwitter() {
 }
 
 func Tweet(token TwitterToken, text string) {
-	api := anaconda.NewTwitterApi(token.accessToken, token.accessTokenSecret)
+	api := anaconda.NewTwitterApi(token.AccessToken, token.AccessTokenSecret)
 	tweet, err := api.PostTweet(text, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +33,7 @@ func Tweet(token TwitterToken, text string) {
 }
 
 func DirectMessageWithId(token TwitterToken, text string, toUser int64) {
-	api := anaconda.NewTwitterApi(token.accessToken, token.accessTokenSecret)
+	api := anaconda.NewTwitterApi(token.AccessToken, token.AccessTokenSecret)
 	dm, err := api.PostDMToUserId(text, toUser)
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +42,7 @@ func DirectMessageWithId(token TwitterToken, text string, toUser int64) {
 }
 
 func DirectMessageWithName(token TwitterToken, text string, toUser string) {
-	api := anaconda.NewTwitterApi(token.accessToken, token.accessTokenSecret)
+	api := anaconda.NewTwitterApi(token.AccessToken, token.AccessTokenSecret)
 	dm, err := api.PostDMToScreenName(text, toUser)
 	if err != nil {
 		log.Fatal(err)
