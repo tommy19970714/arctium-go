@@ -71,6 +71,14 @@ type Member struct {
 	updated_at time.Time
 }
 
+func (m *Member) AccountId() int {
+	return m.account_id
+}
+
+func (m *Member) GroupId() int {
+	return m.group_id
+}
+
 type Notifications []*Notification
 
 type Notification struct {
