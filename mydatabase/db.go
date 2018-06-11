@@ -23,6 +23,14 @@ type OauthTwitter struct {
 	updated_at          time.Time
 }
 
+func (o *OauthTwitter) AccessToken() string {
+	return o.access_token
+}
+
+func (o *OauthTwitter) AccessTokenSecret() string {
+	return o.access_token_secret
+}
+
 type Tasks []*Task
 
 type Task struct {
@@ -35,6 +43,22 @@ type Task struct {
 	updated_by  int
 	created_at  time.Time
 	updated_at  time.Time
+}
+
+func (t *Task) GroupId() int {
+	return t.group_id
+}
+
+func (t *Task) Name() string {
+	return t.task_name
+}
+
+func (t *Task) Description() string {
+	return t.description
+}
+
+func (t *Task) Time() time.Time {
+	return t.time
 }
 
 type Members []*Member
@@ -112,7 +136,7 @@ func Connect() {
 }
 
 func unitTest() {
-	connect()
+	Connect()
 	user := SelectOauthTwitter(1)
 	fmt.Println(user.access_token)
 
