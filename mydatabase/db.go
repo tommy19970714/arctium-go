@@ -71,6 +71,20 @@ type Member struct {
 	updated_at time.Time
 }
 
+type Notifications []*Notification
+
+type Notification struct {
+	id         int
+	task_id    int
+	date       time.Time
+	created_at time.Time
+	updated_at time.Time
+}
+
+func (n *Notification) Date() time.Time {
+	return n.date
+}
+
 func SelectOauthTwitter(account_id int) OauthTwitter {
 	sql := fmt.Sprintf("select * from oauthtwitters where account_id = %d;", account_id)
 	rows, sqlErr := DBConn.Query(sql)
@@ -119,6 +133,24 @@ func SelectMembers(group_id int) Members {
 		members = append(members, &member)
 	}
 	return members
+}
+
+func SelectNotifications(task_id int) Notifications {
+	sql := fmt.Sprintf("select * from notifications where task_id = %d;", task_id)
+	rows, sqlErr := DBConn.Query(sql)
+	if sqlErr != nil {
+		log.Fatal(sqlErr)
+	}
+	var notifications Notifications
+	for rows.Next() {
+		note := Notification{}
+		err := rows.Scan(&note.id, &note.task_id, &note.date, &note.created_at, &note.updated_at)
+		if err != nil {
+			log.Fatal(err)
+		}
+		notifications = append(notifications, &note)
+	}
+	return notifications
 }
 
 func Connect() {
