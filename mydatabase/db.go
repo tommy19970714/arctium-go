@@ -85,6 +85,36 @@ func (n *Notification) Date() time.Time {
 	return n.date
 }
 
+type Group struct {
+	id              int
+	group_name      string
+	description     string
+	publish_setting string
+	created_by      int
+	updated_by      int
+	created_at      time.Time
+	updated_at      time.Time
+}
+
+func (g *Group) Id() int {
+	return g.id
+}
+
+func (g *Group) GroupName() string {
+	return g.group_name
+}
+
+func (g *Group) Description() string {
+	return g.description
+}
+
+func (g *Group) IsPublic() bool {
+	if g.publish_setting == "public" {
+		return true
+	}
+	return false
+}
+
 func SelectOauthTwitter(account_id int) OauthTwitter {
 	sql := fmt.Sprintf("select * from oauthtwitters where account_id = %d;", account_id)
 	rows, sqlErr := DBConn.Query(sql)
@@ -151,6 +181,22 @@ func SelectNotifications(task_id int) Notifications {
 		notifications = append(notifications, &note)
 	}
 	return notifications
+}
+
+func SelectGroup(task_id int) Group {
+	sql := fmt.Sprintf("select * from groups where id = %d;", task_id)
+	rows, sqlErr := DBConn.Query(sql)
+	if sqlErr != nil {
+		log.Fatal(sqlErr)
+	}
+	group := Group{}
+	if rows.Next() {
+		err := rows.Scan(&group.id, &group.group_name, &group.description, &group.publish_setting, &group.created_by, &group.updated_by, &group.created_at, &group.updated_at)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return group
 }
 
 func Connect() {
