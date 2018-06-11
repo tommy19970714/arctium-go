@@ -14,6 +14,30 @@ var (
 	DBConn *sql.DB
 )
 
+type User struct {
+	id       int
+	email    string
+	provider string
+	uid      string
+	name     string
+}
+
+func (u *User) Email() string {
+	return u.email
+}
+
+func (u *User) Provider() string {
+	return u.provider
+}
+
+func (u *User) Uid() string {
+	return u.uid
+}
+
+func (u *User) Name() string {
+	return u.name
+}
+
 type OauthTwitter struct {
 	id                  int
 	account_id          int
@@ -121,6 +145,22 @@ func (g *Group) IsPublic() bool {
 		return true
 	}
 	return false
+}
+
+func SelectUser(account_id int) User {
+	sql := fmt.Sprintf("select id, email, provider, uid, name from users where id = %d;", account_id)
+	rows, sqlErr := DBConn.Query(sql)
+	if sqlErr != nil {
+		log.Fatal(sqlErr)
+	}
+	user := User{}
+	if rows.Next() {
+		err := rows.Scan(&user.id, &user.email, &user.provider, &user.uid, &user.name)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return user
 }
 
 func SelectOauthTwitter(account_id int) OauthTwitter {
