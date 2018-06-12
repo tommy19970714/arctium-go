@@ -104,6 +104,7 @@ func removeTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	mydatabase.Connect()
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/change", changeTaskHandler)
 	http.HandleFunc("/remove", removeTaskHandler)
