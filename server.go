@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"text/template"
+	"time"
 
 	"./mydatabase"
 	"./twitter"
@@ -67,16 +68,15 @@ func changeTaskHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "error")
 			return
 		}
-		layout := "2006-01-02 15:04:05"
 		task := mydatabase.SelectTask(id)
 		group := mydatabase.SelectGroup(task.GroupId())
 		notifications := mydatabase.SelectNotifications(id)
 		for _, n := range notifications {
-			dateStr := n.Date().Format(layout)
+			date := n.Date().In(time.UTC)
 			if group.IsPublic() {
-				gocron.EveryOnlyId(uint64(id)).AtDate(dateStr).Do(scheduleReplay, id, group.Id())
+				gocron.EveryOnlyId(uint64(id)).AtDateWithTime(date).Do(scheduleReplay, id, group.Id())
 			} else {
-				gocron.EveryOnlyId(uint64(id)).AtDate(dateStr).Do(scheduleDM, id, group.Id())
+				gocron.EveryOnlyId(uint64(id)).AtDateWithTime(date).Do(scheduleDM, id, group.Id())
 			}
 		}
 		w.WriteHeader(http.StatusOK)
