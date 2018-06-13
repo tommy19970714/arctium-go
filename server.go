@@ -52,11 +52,9 @@ func scheduleReplay(task_id int, group_id int) {
 	task := mydatabase.SelectTask(task_id)
 	members := mydatabase.SelectMembers(group_id)
 	for _, m := range members {
-		oauth := mydatabase.SelectOauthTwitter(m.AccountId())
 		user := mydatabase.SelectUser(m.AccountId())
-		token := twitter.TwitterToken{AccessToken: oauth.AccessToken(), AccessTokenSecret: oauth.AccessTokenSecret()}
 		text := fmt.Sprintf("@%s %s を忘れないでね！", user.Name(), task.Name())
-		twitter.Tweet(token, text)
+		twitter.BotTweet(text)
 	}
 }
 

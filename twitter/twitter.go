@@ -13,6 +13,10 @@ type TwitterToken struct {
 	AccessTokenSecret string
 }
 
+var (
+	BotToken *TwitterToken
+)
+
 func SetupTwitter() {
 	var myEnv map[string]string
 	myEnv, err := godotenv.Read()
@@ -21,10 +25,20 @@ func SetupTwitter() {
 	}
 	anaconda.SetConsumerKey(myEnv["TWITTER_CONSUMER_KEY"])
 	anaconda.SetConsumerSecret(myEnv["TWITTER_CONSUMER_SECRET"])
+	BotToken = &TwitterToken{myEnv["BOT_AccessToken"], myEnv["BOT_AccessTokenSecret"]}
 }
 
 func Tweet(token TwitterToken, text string) {
 	api := anaconda.NewTwitterApi(token.AccessToken, token.AccessTokenSecret)
+	tweet, err := api.PostTweet(text, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(tweet.Text)
+}
+
+func BotTweet(text string) {
+	api := anaconda.NewTwitterApi(BotToken.AccessToken, BotToken.AccessTokenSecret)
 	tweet, err := api.PostTweet(text, nil)
 	if err != nil {
 		log.Println(err)
