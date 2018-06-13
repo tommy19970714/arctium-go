@@ -70,7 +70,7 @@ func changeTaskHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		task := mydatabase.SelectTask(id)
 		group := mydatabase.SelectGroup(task.GroupId())
-		notifications := mydatabase.SelectNotifications(id)
+		notifications := mydatabase.SelectNotificationsWithTask(id)
 		for _, n := range notifications {
 			date := n.Date().In(time.UTC)
 			if group.IsPublic() {
@@ -104,12 +104,31 @@ func removeTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func routineTask() {
+	fmt.Println("routineTask")
+	notifications := mydatabase.SelectNotificationsWithMin(60)
+	for _, n := range notifications {
+		id := n.TaskId()
+		task := mydatabase.SelectTask(id)
+		group := mydatabase.SelectGroup(task.GroupId())
+		date := n.Date().In(time.UTC)
+		gocron.RemoveFromId(uint64(id))
+		if group.IsPublic() {
+			gocron.EveryOnlyId(uint64(id)).AtDateWithTime(date).Do(scheduleReplay, id, group.Id())
+		} else {
+			gocron.EveryOnlyId(uint64(id)).AtDateWithTime(date).Do(scheduleDM, id, group.Id())
+		}
+	}
+}
+
 func main() {
 	mydatabase.Connect()
 	twitter.SetupTwitter()
+	gocron.EveryWithId(0, 1).Hour().Do(routineTask)
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/change", changeTaskHandler)
 	http.HandleFunc("/remove", removeTaskHandler)
 	gocron.Start()
+	routineTask()
 	http.ListenAndServe(":1955", nil)
 }
