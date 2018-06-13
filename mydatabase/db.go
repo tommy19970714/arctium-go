@@ -113,6 +113,10 @@ type Notification struct {
 	updated_at time.Time
 }
 
+func (n *Notification) TaskId() int {
+	return n.task_id
+}
+
 func (n *Notification) Date() time.Time {
 	return n.date
 }
@@ -213,8 +217,7 @@ func SelectMembers(group_id int) Members {
 	return members
 }
 
-func SelectNotifications(task_id int) Notifications {
-	sql := fmt.Sprintf("select * from notifications where task_id = %d;", task_id)
+func selectNotifications(sql string) Notifications {
 	rows, sqlErr := DBConn.Query(sql)
 	if sqlErr != nil {
 		log.Fatal(sqlErr)
@@ -229,6 +232,16 @@ func SelectNotifications(task_id int) Notifications {
 		notifications = append(notifications, &note)
 	}
 	return notifications
+}
+
+func SelectNotificationsWithTask(task_id int) Notifications {
+	sql := fmt.Sprintf("select * from notifications where task_id = %d;", task_id)
+	return selectNotifications(sql)
+}
+
+func SelectNotificationsWithMin(minute int) Notifications {
+	sql := fmt.Sprintf("select * from notifications where date > now() and date <= cast(now() + interval '%d minutes' as timestamp);", minute)
+	return selectNotifications(sql)
 }
 
 func SelectGroup(task_id int) Group {
