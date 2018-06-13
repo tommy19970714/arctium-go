@@ -68,7 +68,8 @@ func changeTaskHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		layout := "2006-01-02 15:04:05"
-		group := mydatabase.SelectGroup(id)
+		task := mydatabase.SelectTask(id)
+		group := mydatabase.SelectGroup(task.GroupId())
 		notifications := mydatabase.SelectNotifications(id)
 		for _, n := range notifications {
 			dateStr := n.Date().Format(layout)
