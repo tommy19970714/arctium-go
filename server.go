@@ -26,7 +26,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	tasks := make([]*Task, len(jobs)+1)
 
 	for i, job := range jobs {
-		tasks[i] = &Task{job.Id(), job.RunTime().String()}
+		tasks[i] = &Task{job.Id(), job.NextScheduledTime().String()}
 	}
 
 	err = tmpl.Execute(w, tasks)
@@ -105,9 +105,10 @@ func removeTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mydatabase.Connect()
+	twitter.SetupTwitter()
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/change", changeTaskHandler)
 	http.HandleFunc("/remove", removeTaskHandler)
+	gocron.Start()
 	http.ListenAndServe(":1955", nil)
-	<-gocron.Start()
 }
