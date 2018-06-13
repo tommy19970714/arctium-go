@@ -15,9 +15,9 @@ type TwitterToken struct {
 
 func SetupTwitter() {
 	var myEnv map[string]string
-	myEnv, err := godotenv.Read("../.env")
+	myEnv, err := godotenv.Read()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(err)
 	}
 	anaconda.SetConsumerKey(myEnv["TWITTER_CONSUMER_KEY"])
 	anaconda.SetConsumerSecret(myEnv["TWITTER_CONSUMER_SECRET"])

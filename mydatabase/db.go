@@ -249,9 +249,9 @@ func SelectGroup(task_id int) Group {
 
 func Connect() {
 	var myEnv map[string]string
-	myEnv, err := godotenv.Read("../.env")
+	myEnv, err := godotenv.Read()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(err)
 	}
 	connStr := fmt.Sprintf("sslmode=disable dbname=arctium_development host=db port=5432 user=postgres password=%s", myEnv["POSTGRESQL_DATABASE_PASSWORD"])
 	db, err := sql.Open("postgres", connStr)
