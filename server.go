@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -10,12 +12,19 @@ import (
 	"./mydatabase"
 	"./twitter"
 
+	"github.com/googollee/go-socket.io"
 	"github.com/tommy19970714/gocron"
 )
 
 type Task struct {
 	Id   uint64
 	Time string
+}
+
+type Message struct {
+	UserId  string `json:"user_id"`
+	TaskId  string `json:"task_id"`
+	Message string `json:"message"`
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -119,6 +128,40 @@ func routineTask() {
 	}
 }
 
+func setupSocket() {
+	server, err := socketio.NewServer(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	server.On("connection", func(so socketio.Socket) {
+		log.Println("on connection")
+		so.On("chat join", func(msg string) {
+			so.Join(msg)
+			log.Println("joined")
+		})
+		so.On("chat message", func(msg string) {
+			var message Message
+			err := json.Unmarshal([]byte(msg), &message)
+			if err == nil {
+				so.BroadcastTo(message.TaskId, "chat message", msg)
+			} else {
+				log.Println(err)
+			}
+		})
+		so.On("chat message with ack", func(msg string) string {
+			return msg
+		})
+		so.On("disconnection", func() {
+			log.Println("on disconnect")
+		})
+	})
+	server.On("error", func(so socketio.Socket, err error) {
+		log.Println("error:", err)
+	})
+	http.Handle("/socket.io/", server)
+	log.Println("open socket")
+}
+
 func main() {
 	mydatabase.Connect()
 	twitter.SetupTwitter()
@@ -126,6 +169,7 @@ func main() {
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/change", changeTaskHandler)
 	http.HandleFunc("/remove", removeTaskHandler)
+	setupSocket()
 	gocron.Start()
 	routineTask()
 	http.ListenAndServe(":1955", nil)
